@@ -1,0 +1,31 @@
+name: Build T-TUNE
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: # Позволяет запускать сборку вручную
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Clone JUCE
+        run: git clone --depth 1 https://github.com/juce-framework/JUCE.git
+
+      - name: Configure CMake
+        run: cmake -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build Release
+        run: cmake --build build --config Release
+
+      - name: Upload VST3 Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: T-TUNE-VST3-Win64
+          path: build/T_TUNE_artefacts/Release/VST3/T-TUNE.vst3
+          if-no-files-found: error
